@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.semurtha.booked;
 
 import androidx.appcompat.app.AppCompatActivity;
 
