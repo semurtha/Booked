@@ -1,8 +1,9 @@
 package com.semurtha.booked;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Review {
+public class Review implements Serializable {
     private String bookTitle, reviewTitle, reviewContent;
     private float rating;
     private boolean favorited;
