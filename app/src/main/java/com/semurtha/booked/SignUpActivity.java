@@ -93,6 +93,7 @@ public class SignUpActivity extends AppCompatActivity {
             emailField.setError("Does not match.");
             emailConfField.setError("Does not match.");
         } else {
+            emailField.setError(null);
             emailConfField.setError(null);
         }
 
@@ -122,6 +123,7 @@ public class SignUpActivity extends AppCompatActivity {
         } else if (password.length() < 6) {
             passwordField.setError("Must be >= 6 characters.");
         } else {
+            passwordField.setError(null);
             passwordConfField.setError(null);
         }
 
