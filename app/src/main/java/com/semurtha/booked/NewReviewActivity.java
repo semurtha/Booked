@@ -1,5 +1,6 @@
 package com.semurtha.booked;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -13,7 +14,9 @@ import android.widget.EditText;
 import android.widget.RatingBar;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -102,16 +105,37 @@ public class NewReviewActivity extends AppCompatActivity {
             Toast.makeText(NewReviewActivity.this, "Adding new review...", Toast.LENGTH_LONG).show();
             mDb.collection(UserFeedActivity.REVIEWS)
                     .add(review)
-                    .addOnSuccessListener(documentReference -> {
-                        Log.d(TAG, "Review created with ID: " + documentReference.getId());
-                        Toast.makeText(NewReviewActivity.this, "Successfully created new review!", Toast.LENGTH_LONG).show();
-                        Intent intent = new Intent(NewReviewActivity.this, UserFeedActivity.class);
-                        startActivity(intent);
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.w(TAG, "Error adding review: ", e);
-                        Toast.makeText(NewReviewActivity.this, "Error adding review: " + e, Toast.LENGTH_LONG).show();
+                    .addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentReference> task) {
+                            if (task.isSuccessful()){
+                                Log.d(TAG, "Review created with ID: " + task.getResult().getId());
+                                Toast.makeText(NewReviewActivity.this, "Successfully created new review!", Toast.LENGTH_LONG).show();
+                                Intent intent = new Intent(NewReviewActivity.this, UserFeedActivity.class);
+                                startActivity(intent);
+                            }
+                            else {
+                                Exception e = task.getException();
+                                Log.w(TAG, "Error adding review: ", e);
+                                Toast.makeText(NewReviewActivity.this, "Error adding review: " + e, Toast.LENGTH_LONG).show();
+                            }
+                        }
                     });
+
+            // TODO : Fix handling of a failed upload. The above and below versions do not display the error toast.
+//            Toast.makeText(NewReviewActivity.this, "Adding new review...", Toast.LENGTH_LONG).show();
+//            mDb.collection(UserFeedActivity.REVIEWS)
+//                    .add(review)
+//                    .addOnSuccessListener(documentReference -> {
+//                        Log.d(TAG, "Review created with ID: " + documentReference.getId());
+//                        Toast.makeText(NewReviewActivity.this, "Successfully created new review!", Toast.LENGTH_LONG).show();
+//                        Intent intent = new Intent(NewReviewActivity.this, UserFeedActivity.class);
+//                        startActivity(intent);
+//                    })
+//                    .addOnFailureListener(e -> {
+//                        Log.w(TAG, "Error adding review: ", e);
+//                        Toast.makeText(NewReviewActivity.this, "Error adding review: " + e, Toast.LENGTH_LONG).show();
+//                    });
 
         }); // end of mSubmitButton OnClickListener
     } // end of OnCreate
