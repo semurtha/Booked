@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -18,6 +19,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.auth.User;
 
 import java.util.ArrayList;
 
@@ -25,6 +27,7 @@ public class UserFeedActivity extends AppCompatActivity {
 
     private static final String TAG = "UserFeed";
     static final String REVIEWS = "reviews";
+    static final String CLICKED_REVIEW = "clickedReview";
     private FirebaseFirestore mDb = FirebaseFirestore.getInstance();
     private FirebaseAuth mAuth;
     private Button mRefresh;
@@ -50,6 +53,14 @@ public class UserFeedActivity extends AppCompatActivity {
                 new ArrayList<Review>()
         );
         reviewListView.setAdapter(adapter);
+        reviewListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent intent = new Intent(UserFeedActivity.this, ReviewDetailActivity.class);
+                intent.putExtra(CLICKED_REVIEW, (Review) adapterView.getItemAtPosition(i));
+                startActivity(intent);
+            }
+        });
 
         FloatingActionButton newReviewButton = findViewById(R.id.fab_new_post);
         newReviewButton.setOnClickListener(v -> clickedNewReview());
