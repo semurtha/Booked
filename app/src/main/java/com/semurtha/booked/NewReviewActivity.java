@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -57,6 +58,34 @@ public class NewReviewActivity extends AppCompatActivity {
             boolean favorited = mFavoritesCheckBox.isChecked();
             String reviewTitle = mReviewTitle.getText().toString().trim();
             String reviewContent = mReviewContent.getText().toString().trim();
+
+            // New Review Validation
+            // Book Title
+            if (TextUtils.isEmpty(bookTitle)) {
+                mBookTitle.setError("Book Title is required");
+                return;
+            } else {
+                mBookTitle.setError(null);
+            }
+            // Review Title
+            if (TextUtils.isEmpty(reviewTitle)) {
+                mReviewTitle.setError("Review Title is required");
+                return;
+            } else {
+                mReviewTitle.setError(null);
+            }
+            // Review Content
+            if (TextUtils.isEmpty(reviewContent)) {
+                mReviewContent.setError("Review Content is required");
+                return;
+            } else {
+                mReviewContent.setError(null);
+            }
+            // Rating
+            if (rating <= 0) {
+                Toast.makeText(NewReviewActivity.this, "Your rating must be higher than zero", Toast.LENGTH_LONG).show();
+                return;
+            }
 
             Review review = new Review(
                     bookTitle,
