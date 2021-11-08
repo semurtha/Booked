@@ -26,7 +26,7 @@ public class NewReviewActivity extends AppCompatActivity {
     private static final String TAG = "AddReview";
 
     private final FirebaseFirestore mDb = FirebaseFirestore.getInstance();
-    private final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    private FirebaseUser user;
 
 //    private EditText mDateReviewed;
     private EditText mBookTitle, mReviewTitle, mReviewContent;
@@ -58,6 +58,7 @@ public class NewReviewActivity extends AppCompatActivity {
             boolean favorited = mFavoritesCheckBox.isChecked();
             String reviewTitle = mReviewTitle.getText().toString().trim();
             String reviewContent = mReviewContent.getText().toString().trim();
+            user = FirebaseAuth.getInstance().getCurrentUser();
 
             // New Review Validation
             // Book Title
@@ -87,6 +88,7 @@ public class NewReviewActivity extends AppCompatActivity {
                 return;
             }
 
+            // If validation passes, create a new review and add it to the database
             Review review = new Review(
                     bookTitle,
                     rating,
