@@ -10,19 +10,28 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:name=".EditReviewActivity"
+            android:label="@string/edit_review_title"
+            android:exported="false" />
+        <activity
             android:name=".ReviewDetailActivity"
+            android:label="@string/review_detail_title"
             android:exported="false" />
         <activity
             android:name=".NewReviewActivity"
+            android:label="@string/add_review_title"
             android:exported="false" />
         <activity
             android:name=".UserFeedActivity"
+            android:label="@string/user_feed_title"
             android:exported="false" />
         <activity
             android:name=".SignUpActivity"
+            android:label="@string/sign_up_title"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
+            android:label="@string/sign_in_title"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
