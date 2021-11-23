@@ -5,8 +5,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ReviewDetailActivity"
-    android:layout_margin="10dp">
+    tools:context=".ReviewDetailActivity">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar_main" />
 
     <ImageView
         android:id="@+id/detail_book_image"
@@ -15,14 +18,14 @@
         android:src="@drawable/placeholder"
         android:contentDescription="@string/detail_image_description"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
         android:scaleType="centerCrop"/>
 
     <TextView
         android:id="@+id/detail_book_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintStart_toEndOf="@id/detail_book_image"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginStart="10dp"

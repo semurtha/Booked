@@ -13,30 +13,34 @@
         android:layout_height="match_parent"
         tools:context=".UserFeedActivity">
 
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/toolbar_main" />
+
         <TextView
             android:id="@+id/feedDisplay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
             android:text="@string/app_name"/>
 
-        <Button
-            android:id="@+id/logoutButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/feedDisplay"
-            app:layout_constraintStart_toStartOf="parent"
-            android:text="Logout"
-            android:onClick="clickedLogout"/>
+<!--        <Button-->
+<!--            android:id="@+id/logoutButton"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/feedDisplay"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            android:text="Logout"-->
+<!--            android:onClick="clickedLogout"/>-->
 
-        <Button
-            android:id="@+id/feed_refresh_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/logoutButton"
-            android:text="Refresh Feed"/>
+<!--        <Button-->
+<!--            android:id="@+id/feed_refresh_button"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="@id/feedDisplay"-->
+<!--            android:text="Refresh Feed"/>-->
 
         <ListView
             android:id="@+id/review_list_view"
@@ -44,7 +48,7 @@
             android:layout_height="0dp"
             android:layout_marginTop="15dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/logoutButton"
+            app:layout_constraintTop_toBottomOf="@id/feedDisplay"
             app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,9 +1,14 @@
 package com.semurtha.booked;
 
+import com.google.firebase.firestore.Exclude;
+
 import java.io.Serializable;
 import java.util.Date;
 
 public class Review implements Serializable {
+
+    @Exclude private String id;
+
     private String bookTitle, reviewTitle, reviewContent;
     private float rating;
     private boolean favorited;
@@ -34,12 +39,17 @@ public class Review implements Serializable {
                 "reviewDate=" + reviewDate + '\n';
     }
 
+
     /*
-    TODO : Add validation for submitting reviews - nothing left blank
-    TODO : Swap from list view to recyclerview w/ cards
-    TODO : Handle adding a book to users' favorites
-    TODO : Swap from default appbar to toolbar
+        TODO : Swap from list view to recyclerview w/ cards
+        TODO : Handle adding a book to users' favorites
     */
+
+    @Exclude
+    public String getId() { return id; }
+
+    public void setId(String id) { this.id = id; }
+
     public String getBookTitle() {
         return bookTitle;
     }

@@ -7,10 +7,14 @@
     android:layout_height="match_parent"
     tools:context=".SignUpActivity">
 
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar_main" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <EditText
@@ -89,6 +93,8 @@
             app:layout_constraintTop_toBottomOf="@id/su_password_confirm"
             app:layout_constraintStart_toEndOf="@id/cancel_button"
             app:layout_constraintEnd_toEndOf="parent"
+            android:backgroundTint="@color/colorAccent"
+            android:textColor="@color/white"
             android:text="@string/sign_up_button"
             android:onClick="clickedSignUp"/>
 

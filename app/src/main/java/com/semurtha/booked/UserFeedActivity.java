@@ -1,10 +1,13 @@
 package com.semurtha.booked;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -37,6 +40,9 @@ public class UserFeedActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_feed);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mAuth.getCurrentUser();
         String full = user.getEmail() + " " + user.getDisplayName();
@@ -65,16 +71,36 @@ public class UserFeedActivity extends AppCompatActivity {
         FloatingActionButton newReviewButton = findViewById(R.id.fab_new_post);
         newReviewButton.setOnClickListener(v -> clickedNewReview());
 
-        mRefresh = findViewById(R.id.feed_refresh_button);
-        mRefresh.setOnClickListener(v -> clickedRefresh());
+//        mRefresh = findViewById(R.id.feed_refresh_button);
+//        mRefresh.setOnClickListener(v -> clickedRefresh());
 
     }
 
-    public void clickedLogout(View view) {
-        FirebaseAuth.getInstance().signOut();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the app bar
+        getMenuInflater().inflate(R.menu.menu_feed, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_home:
+                startActivity(new Intent(this, UserFeedActivity.class));
+                return true;
+            case R.id.action_logout:
+                FirebaseAuth.getInstance().signOut();
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.action_refresh:
+                clickedRefresh();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     public void clickedNewReview() {
@@ -93,6 +119,7 @@ public class UserFeedActivity extends AppCompatActivity {
                         ArrayList<Review> reviews = new ArrayList<>();
                         for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                             Review r = document.toObject(Review.class);
+                            r.setId(document.getId());
                             reviews.add(r);
                             Log.d(TAG, r.getReviewedBy() + " " + r.getReviewTitle());
                         }
