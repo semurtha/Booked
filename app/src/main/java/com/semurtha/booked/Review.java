@@ -9,41 +9,65 @@ public class Review implements Serializable {
 
     @Exclude private String id;
 
-    private String bookTitle, reviewTitle, reviewContent;
+    private String bookTitle, reviewTitle, reviewContent, reviewedBy, reviewedByName, published, coverURL;
     private float rating;
     private boolean favorited;
-    private String reviewedBy;
     private Date reviewDate;
+
 
     public Review() {
     }
 
-    public Review (String bookTitle, float rating, boolean favorited, String reviewTitle, String reviewContent, String reviewedBy, Date reviewDate) {
+    public Review (String bookTitle, String published, String coverURL, float rating, boolean favorited, String reviewTitle, String reviewContent, String reviewedBy, String reviewedByName, Date reviewDate) {
         this.bookTitle = bookTitle;
+        this.published = published;
+        this.coverURL = coverURL;
         this.rating = rating;
         this.favorited = favorited;
         this.reviewTitle = reviewTitle;
         this.reviewContent = reviewContent;
         this.reviewedBy = reviewedBy;
+        this.reviewedByName = reviewedByName;
         this.reviewDate = reviewDate;
     }
 
     @Override
     public String toString() {
         return  "\nbookTitle='" + bookTitle + '\'' + '\n' +
+                "pubYear='" + published + '\'' + '\n' +
+                "coverURL='" + coverURL + '\'' + '\n' +
                 "reviewTitle='" + reviewTitle + '\'' + '\n' +
                 "reviewContent='" + reviewContent + '\'' + '\n' +
                 "rating=" + rating + '\n' +
                 "favorited=" + favorited + '\n' +
                 "reviewedBy='" + reviewedBy + '\'' + '\n' +
+                "reviewedByName='" + reviewedByName + '\'' + '\n' +
                 "reviewDate=" + reviewDate + '\n';
     }
 
+    public String getCoverURL() {
+        return coverURL;
+    }
 
-    /*
-        TODO : Swap from list view to recyclerview w/ cards
-        TODO : Handle adding a book to users' favorites
-    */
+    public void setCoverURL(String coverURL) {
+        this.coverURL = coverURL;
+    }
+
+    public String getReviewedByName() {
+        return reviewedByName;
+    }
+
+    public void setReviewedByName(String reviewedByName) {
+        this.reviewedByName = reviewedByName;
+    }
+
+    public String getPublished() {
+        return published;
+    }
+
+    public void setPublished(String published) {
+        this.published = published;
+    }
 
     @Exclude
     public String getId() { return id; }

@@ -1,9 +1,14 @@
 package com.semurtha.booked;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -25,17 +30,16 @@ import java.util.Date;
 
 public class NewReviewActivity extends AppCompatActivity {
 
-    private static final String TAG = "AddReview";
+    private static final String TAG = "NewReview";
+    public static final String RESULT = "result";
 
     private final FirebaseFirestore mDb = FirebaseFirestore.getInstance();
     private FirebaseUser user;
-
-//    private EditText mDateReviewed;
     private EditText mBookTitle, mReviewTitle, mReviewContent;
     private RatingBar mRatingBar;
     private CheckBox mFavoritesCheckBox;
     private Button mSubmitButton;
-    private Review review;
+    private String pubYear, coverURL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,18 +47,42 @@ public class NewReviewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_new_review);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        setTitle(R.string.add_review_title);
+
+        ActivityResultLauncher<Intent> bookResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getResultCode() == Activity.RESULT_OK) {
+                            Intent data = result.getData();
+                            Book book = (Book) data.getSerializableExtra(RESULT);
+                            Log.d(TAG, "openLibraryId: " + book.getOpenLibraryId());
+                            Log.d(TAG, "title: " + book.getTitle());
+                            Log.d(TAG, "author: " + book.getAuthor());
+                            Log.d(TAG, "pubYear: " + book.getPubYear());
+                            Log.d(TAG, "coverURL: " + book.getCoverUrl());
+                            // get book object, set title text
+                            pubYear = book.getPubYear();
+                            coverURL = book.getCoverUrl();
+                            mBookTitle.setText(book.getTitle());
+                        }
+                    }
+                });
 
         // Pointers
         mBookTitle = findViewById(R.id.add_book_title);
-//        mDateReviewed = findViewById(R.id.add_date_reviewed);
+        mBookTitle.setOnClickListener(view -> {
+            Intent intent = new Intent(NewReviewActivity.this, BookListActivity.class);
+            bookResultLauncher.launch(intent);
+        });
+
         mReviewTitle = findViewById(R.id.add_review_title);
         mReviewContent = findViewById(R.id.add_review_content);
         mRatingBar = findViewById(R.id.add_rating_bar);
         mFavoritesCheckBox = findViewById(R.id.add_favorites_box);
+
         mSubmitButton = findViewById(R.id.add_review_submit_button);
-        // Add mask to date field
-//        new DateInputMask(mDateReviewed);
-        //mSubmitButton.setOnClickListener(v -> createReview());
         mSubmitButton.setOnClickListener(view -> {
             Log.d(TAG, "Clicked submit.");
             String bookTitle = mBookTitle.getText().toString().trim();
@@ -95,15 +123,19 @@ public class NewReviewActivity extends AppCompatActivity {
             // If validation passes, create a new review and add it to the database
             Review review = new Review(
                     bookTitle,
+                    pubYear,
+                    coverURL,
                     rating,
                     favorited,
                     reviewTitle,
                     reviewContent,
                     user.getUid(),
+                    user.getDisplayName(),
                     new Date()
             );
 
-            Toast.makeText(NewReviewActivity.this, "Adding new review...", Toast.LENGTH_LONG).show();
+            Toast addToast = Toast.makeText(NewReviewActivity.this, "Adding new review...", Toast.LENGTH_SHORT);
+            addToast.show();
             mDb.collection(UserFeedActivity.REVIEWS)
                     .add(review)
                     .addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
@@ -111,32 +143,19 @@ public class NewReviewActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<DocumentReference> task) {
                             if (task.isSuccessful()){
                                 Log.d(TAG, "Review created with ID: " + task.getResult().getId());
-                                Toast.makeText(NewReviewActivity.this, "Successfully created new review!", Toast.LENGTH_LONG).show();
+                                addToast.cancel();
+                                Toast.makeText(NewReviewActivity.this, "Successfully created new review!", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(NewReviewActivity.this, UserFeedActivity.class);
                                 startActivity(intent);
                             }
                             else {
                                 Exception e = task.getException();
                                 Log.w(TAG, "Error adding review: ", e);
-                                Toast.makeText(NewReviewActivity.this, "Error adding review: " + e, Toast.LENGTH_LONG).show();
+                                addToast.cancel();
+                                Toast.makeText(NewReviewActivity.this, "Error adding review: " + e, Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
-
-            // TODO : Fix handling of a failed upload. The above and below versions do not display the error toast.
-//            Toast.makeText(NewReviewActivity.this, "Adding new review...", Toast.LENGTH_LONG).show();
-//            mDb.collection(UserFeedActivity.REVIEWS)
-//                    .add(review)
-//                    .addOnSuccessListener(documentReference -> {
-//                        Log.d(TAG, "Review created with ID: " + documentReference.getId());
-//                        Toast.makeText(NewReviewActivity.this, "Successfully created new review!", Toast.LENGTH_LONG).show();
-//                        Intent intent = new Intent(NewReviewActivity.this, UserFeedActivity.class);
-//                        startActivity(intent);
-//                    })
-//                    .addOnFailureListener(e -> {
-//                        Log.w(TAG, "Error adding review: ", e);
-//                        Toast.makeText(NewReviewActivity.this, "Error adding review: " + e, Toast.LENGTH_LONG).show();
-//                    });
 
         }); // end of mSubmitButton OnClickListener
     } // end of OnCreate

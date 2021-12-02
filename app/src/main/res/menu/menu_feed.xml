@@ -15,10 +15,5 @@
         android:orderInCategory="2"
         app:showAsAction="always" />
 
-    <item android:id="@+id/action_refresh"
-        android:title="@string/menu_home"
-        android:icon="@drawable/baseline_refresh_white_24"
-        android:orderInCategory="1"
-        app:showAsAction="always" />
 
 </menu>

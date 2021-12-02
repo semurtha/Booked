@@ -1,8 +1,15 @@
 package com.semurtha.booked;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,22 +26,29 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.auth.User;
 
 import java.util.ArrayList;
 
-public class UserFeedActivity extends AppCompatActivity {
+public class UserFeedActivity extends AppCompatActivity  implements FeedAdapter.Listener{
 
     private static final String TAG = "UserFeed";
     static final String REVIEWS = "reviews";
     static final String CLICKED_REVIEW = "clickedReview";
-    private FirebaseFirestore mDb = FirebaseFirestore.getInstance();
-    private FirebaseAuth mAuth;
-    private Button mRefresh;
+    private FirebaseFirestore mDb;
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private ArrayAdapter<Review> adapter;
+    private FeedAdapter mAdapter;
+    private RecyclerView mRecyclerView;
+    private ArrayList<Review> reviewArrayList;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,38 +56,63 @@ public class UserFeedActivity extends AppCompatActivity {
         setContentView(R.layout.activity_user_feed);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        mAuth = FirebaseAuth.getInstance();
+        setTitle(R.string.user_feed_title);
         FirebaseUser user = mAuth.getCurrentUser();
-        String full = user.getEmail() + " " + user.getDisplayName();
-        TextView text = findViewById(R.id.feedDisplay);
+        mDb = FirebaseFirestore.getInstance();
+        reviewArrayList = new ArrayList<Review>();
 
-        if(user != null){
-            text.setText(full);
-        }
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage("Fetching Data...");
+        progressDialog.show();
 
-        ListView reviewListView = findViewById(R.id.review_list_view);
-        adapter = new ArrayAdapter<Review>(
-                this,
-                android.R.layout.simple_list_item_1,
-                new ArrayList<Review>()
-        );
-        reviewListView.setAdapter(adapter);
-        reviewListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent intent = new Intent(UserFeedActivity.this, ReviewDetailActivity.class);
-                intent.putExtra(CLICKED_REVIEW, (Review) adapterView.getItemAtPosition(i));
-                startActivity(intent);
-            }
-        });
+        mRecyclerView = findViewById(R.id.review_recycler_view);
+        mAdapter = new FeedAdapter(UserFeedActivity.this, reviewArrayList);
+        mAdapter.setListener(this);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         FloatingActionButton newReviewButton = findViewById(R.id.fab_new_post);
         newReviewButton.setOnClickListener(v -> clickedNewReview());
 
-//        mRefresh = findViewById(R.id.feed_refresh_button);
-//        mRefresh.setOnClickListener(v -> clickedRefresh());
+        EventChangeListener();
+    }
 
+    private void EventChangeListener() {
+
+        mDb.collection(REVIEWS).orderBy("reviewDate", Query.Direction.DESCENDING)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                        if(error != null) {
+                            if(progressDialog.isShowing()) {
+                                progressDialog.dismiss();
+                            }
+                            Log.e(TAG, error.getMessage());
+                            return;
+                        }
+
+                        for (DocumentChange dc : value.getDocumentChanges()) {
+                            if (dc.getType() == DocumentChange.Type.ADDED) {
+                                QueryDocumentSnapshot document = dc.getDocument();
+                                Review r = document.toObject(Review.class);
+                                r.setId(document.getId());
+                                reviewArrayList.add(r);
+                            }
+                            if (dc.getType() == DocumentChange.Type.REMOVED) {
+                                QueryDocumentSnapshot document = dc.getDocument();
+                                Review r = document.toObject(Review.class);
+                                r.setId(document.getId());
+                                reviewArrayList.remove(r);
+                            }
+
+                            mAdapter.notifyDataSetChanged();
+                            if(progressDialog.isShowing()) {
+                                progressDialog.dismiss();
+                            }
+                        }
+                    }
+                });
     }
 
     @Override
@@ -91,12 +130,7 @@ public class UserFeedActivity extends AppCompatActivity {
                 startActivity(new Intent(this, UserFeedActivity.class));
                 return true;
             case R.id.action_logout:
-                FirebaseAuth.getInstance().signOut();
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-                return true;
-            case R.id.action_refresh:
-                clickedRefresh();
+                logout();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -109,23 +143,32 @@ public class UserFeedActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void clickedRefresh() {
-        Log.d(TAG,"Clicked Refresh Feed");
-        mDb.collection(REVIEWS)
-                .get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+    @Override
+    public void onClick(int position) {
+        Log.d(TAG, "Clicked index: " + position);
+        Intent intent = new Intent(UserFeedActivity.this, ReviewDetailActivity.class);
+        intent.putExtra(CLICKED_REVIEW, reviewArrayList.get(position));
+        startActivity(intent);
+
+    }
+
+    public void logout(){
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setMessage("Are you sure you want to logout?")
+                .setPositiveButton("Logout", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        ArrayList<Review> reviews = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                            Review r = document.toObject(Review.class);
-                            r.setId(document.getId());
-                            reviews.add(r);
-                            Log.d(TAG, r.getReviewedBy() + " " + r.getReviewTitle());
-                        }
-                        adapter.clear();
-                        adapter.addAll(reviews);
+                    public void onClick(DialogInterface dialog, int which) {
+                        FirebaseAuth.getInstance().signOut();
+                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                        startActivity(intent);
                     }
-                });
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
     }
 }

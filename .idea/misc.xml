@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/semur/OneDrive - UNC-Wilmington/2021 Fall/CSC 315/Assignments/FinalProject/app/src/main/res/layout/activity_book_list.xml" value="0.2692502532928065" />
         <entry key="..\:/Users/semur/OneDrive - UNC-Wilmington/2021 Fall/CSC 315/Assignments/FinalProject/app/src/main/res/layout/activity_edit_review.xml" value="0.24444444444444444" />
         <entry key="..\:/Users/semur/OneDrive - UNC-Wilmington/2021 Fall/CSC 315/Assignments/FinalProject/app/src/main/res/layout/activity_main.xml" value="0.2" />
         <entry key="..\:/Users/semur/OneDrive - UNC-Wilmington/2021 Fall/CSC 315/Assignments/FinalProject/app/src/main/res/layout/activity_new_review.xml" value="0.24444444444444444" />
@@ -10,7 +11,12 @@
         <entry key="..\:/Users/semur/OneDrive - UNC-Wilmington/2021 Fall/CSC 315/Assignments/FinalProject/app/src/main/res/layout/activity_sign_up.xml" value="0.2692502532928065" />
         <entry key="..\:/Users/semur/OneDrive - UNC-Wilmington/2021 Fall/CSC 315/Assignments/FinalProject/app/src/main/res/layout/activity_user_feed.xml" value="0.2624113475177305" />
         <entry key="..\:/Users/semur/OneDrive - UNC-Wilmington/2021 Fall/CSC 315/Assignments/FinalProject/app/src/main/res/layout/content_scrolling.xml" value="0.17844202898550723" />
+        <entry key="..\:/Users/semur/OneDrive - UNC-Wilmington/2021 Fall/CSC 315/Assignments/FinalProject/app/src/main/res/layout/item_book.xml" value="0.2692502532928065" />
+        <entry key="..\:/Users/semur/OneDrive - UNC-Wilmington/2021 Fall/CSC 315/Assignments/FinalProject/app/src/main/res/layout/progress_bar_delayed.xml" value="0.2013677811550152" />
+        <entry key="..\:/Users/semur/OneDrive - UNC-Wilmington/2021 Fall/CSC 315/Assignments/FinalProject/app/src/main/res/layout/simple_dropdown_item_2line.xml" value="0.2013677811550152" />
         <entry key="..\:/Users/semur/OneDrive - UNC-Wilmington/2021 Fall/CSC 315/Assignments/FinalProject/app/src/main/res/layout/toolbar_main.xml" value="0.20425724637681159" />
+        <entry key="..\:/Users/semur/OneDrive - UNC-Wilmington/2021 Fall/CSC 315/Assignments/FinalProject/app/src/main/res/layout/user_feed_card.xml" value="0.2692502532928065" />
+        <entry key="..\:/Users/semur/OneDrive - UNC-Wilmington/2021 Fall/CSC 315/Assignments/FinalProject/app/src/main/res/menu/menu_book_list.xml" value="0.32564102564102565" />
         <entry key="..\:/Users/semur/OneDrive - UNC-Wilmington/2021 Fall/CSC 315/Assignments/FinalProject/app/src/main/res/menu/menu_edit_review.xml" value="0.41759259259259257" />
         <entry key="..\:/Users/semur/OneDrive - UNC-Wilmington/2021 Fall/CSC 315/Assignments/FinalProject/app/src/main/res/menu/menu_feed.xml" value="0.33" />
         <entry key="..\:/Users/semur/OneDrive - UNC-Wilmington/2021 Fall/CSC 315/Assignments/FinalProject/app/src/main/res/menu/menu_main.xml" value="0.41759259259259257" />

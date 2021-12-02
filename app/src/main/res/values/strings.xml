@@ -48,4 +48,8 @@
     <string name="menu_delete">Delete</string>
     <string name="menu_refresh">Refresh Feed</string>
 
+    <!--  Book List Activity  -->
+    <string name="list_activity_title">Find A Book</string>
+    <string name="menu_search">Search</string>
+
 </resources>

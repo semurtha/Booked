@@ -7,6 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -21,6 +22,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.squareup.picasso.Picasso;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class ReviewDetailActivity extends AppCompatActivity {
 
@@ -44,6 +49,7 @@ public class ReviewDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_review_detail);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        setTitle(R.string.review_detail_title);
         mAuth = FirebaseAuth.getInstance();
 
         // Pointers
@@ -59,12 +65,15 @@ public class ReviewDetailActivity extends AppCompatActivity {
         mReview = (Review) getIntent().getSerializableExtra(UserFeedActivity.CLICKED_REVIEW);
         if (mReview != null) {
             Log.d(TAG, "User clicked a review");
-//            mBookImage.setImageDrawable(); TODO: Add Book API info to get cover image
+            Picasso.with(this).load(Uri.parse(mReview.getCoverURL())).error(R.drawable.ic_nocover).into(mBookImage);
             mBookTitle.setText(mReview.getBookTitle());
-//            mBookYear.setText("Book Year Goes Here"); TODO: Add Book API info to get year
+            mBookYear.setText(mReview.getPublished());
             mRating.setRating(mReview.getRating());
-//            mReviewerName.setText("Reviewer Name Goes Here"); TODO: Implement Display Name Features
-            mReviewDate.setText(mReview.getReviewDate().toString());
+            mReviewerName.setText(mReview.getReviewedByName());
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(mReview.getReviewDate());
+            SimpleDateFormat date = new SimpleDateFormat("MM/dd/yyyy 'at' h:mm a z");
+            mReviewDate.setText(date.format(cal.getTime()));
             mReviewTitle.setText(mReview.getReviewTitle());
             mReviewContent.setText(mReview.getReviewContent());
             reviewer = mReview.getReviewedBy();
@@ -110,15 +119,14 @@ public class ReviewDetailActivity extends AppCompatActivity {
                 return true;
 
             case R.id.action_logout:
-                FirebaseAuth.getInstance().signOut();
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
+                logout();
                 return true;
 
             case R.id.action_edit:
                 Intent editIntent = new Intent(ReviewDetailActivity.this, EditReviewActivity.class);
                 editIntent.putExtra(UserFeedActivity.CLICKED_REVIEW, mReview);
                 startActivity(editIntent);
+                return true;
 
             case R.id.action_delete:
                 // Popup window: are you sure?
@@ -155,9 +163,30 @@ public class ReviewDetailActivity extends AppCompatActivity {
                             }
                         })
                         .show();
+                return true;
 
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+    
+    public void logout(){
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setMessage("Are you sure you want to logout?")
+                .setPositiveButton("Logout", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        FirebaseAuth.getInstance().signOut();
+                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                        startActivity(intent);
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
     }
 }

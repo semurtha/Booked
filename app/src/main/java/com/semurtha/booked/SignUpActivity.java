@@ -18,6 +18,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -36,6 +37,7 @@ public class SignUpActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_up);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        setTitle(R.string.sign_up_title);
 
         emailField = findViewById(R.id.su_email);
         emailConfField = findViewById(R.id.su_email_confirm);
@@ -66,6 +68,18 @@ public class SignUpActivity extends AppCompatActivity {
                     if(task.isSuccessful()){
                         Log.d(TAG, "createUserWithEmail:Success");
                         FirebaseUser user = mAuth.getCurrentUser();
+                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                .setDisplayName(String.valueOf(usernameField.getText())).build();
+                        assert user != null;
+                        user.updateProfile(profileUpdates)
+                                .addOnCompleteListener(task1 -> {
+                                    if (task1.isSuccessful()){
+                                        Log.d(TAG, "Display name updated.");
+                                    }
+                                    else {
+                                        Log.d(TAG, "Display name failed to update.");
+                                    }
+                                });
                         updateUI(user);
                     } else {
                         Exception e = task.getException();

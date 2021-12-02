@@ -1,9 +1,14 @@
 package com.semurtha.booked;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -27,15 +32,15 @@ public class EditReviewActivity extends AppCompatActivity {
 
     private static final String TAG = "EditReview";
 
+
     private final FirebaseFirestore mDb = FirebaseFirestore.getInstance();
     private FirebaseUser user;
-
-    //    private EditText mDateReviewed;
     private EditText mBookTitle, mReviewTitle, mReviewContent;
     private RatingBar mRatingBar;
     private CheckBox mFavoritesCheckBox;
     private Button mSubmitButton;
-
+    private String pubYear, coverURL;
+    private Review editReview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +48,10 @@ public class EditReviewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit_review);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        setTitle(R.string.edit_review_title);
+
+        // Get review from passed intent
+        editReview = (Review) getIntent().getSerializableExtra(UserFeedActivity.CLICKED_REVIEW);
 
         // Pointers
         mBookTitle = findViewById(R.id.edit_book_title);
@@ -50,18 +59,44 @@ public class EditReviewActivity extends AppCompatActivity {
         mReviewContent = findViewById(R.id.edit_review_content);
         mRatingBar = findViewById(R.id.edit_rating_bar);
         mFavoritesCheckBox = findViewById(R.id.edit_favorites_box);
+        mSubmitButton = findViewById(R.id.edit_review_submit_button);
 
-        Review editReview = (Review) getIntent().getSerializableExtra(UserFeedActivity.CLICKED_REVIEW);
+        ActivityResultLauncher<Intent> bookResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getResultCode() == Activity.RESULT_OK) {
+                            Intent data = result.getData();
+                            Book book = (Book) data.getSerializableExtra(NewReviewActivity.RESULT);
+                            Log.d(TAG, "openLibraryId: " + book.getOpenLibraryId());
+                            Log.d(TAG, "title: " + book.getTitle());
+                            Log.d(TAG, "author: " + book.getAuthor());
+                            Log.d(TAG, "pubYear: " + book.getPubYear());
+                            Log.d(TAG, "coverURL: " + book.getCoverUrl());
+                            // get book object, set title text
+                            pubYear = book.getPubYear();
+                            coverURL = book.getCoverUrl();
+                            mBookTitle.setText(book.getTitle());
+                        }
+                    }
+                });
+
         if (editReview != null) {
             mBookTitle.setText(editReview.getBookTitle());
             mReviewTitle.setText(editReview.getReviewTitle());
             mReviewContent.setText(editReview.getReviewContent());
             mRatingBar.setRating(editReview.getRating());
+            pubYear = editReview.getPublished();
+            coverURL = editReview.getCoverURL();
             mFavoritesCheckBox.setChecked(editReview.isFavorited());
         }
 
+        mBookTitle.setOnClickListener(view -> {
+            Intent intent = new Intent(EditReviewActivity.this, BookListActivity.class);
+            bookResultLauncher.launch(intent);
+        });
 
-        mSubmitButton = findViewById(R.id.edit_review_submit_button);
         mSubmitButton.setOnClickListener(view -> {
             Log.d(TAG, "Clicked submit.");
             String bookTitle = mBookTitle.getText().toString().trim();
@@ -71,7 +106,7 @@ public class EditReviewActivity extends AppCompatActivity {
             String reviewContent = mReviewContent.getText().toString().trim();
             user = FirebaseAuth.getInstance().getCurrentUser();
 
-            // New Review Validation
+            // Edit Review Validation
             // Book Title
             if (TextUtils.isEmpty(bookTitle)) {
                 mBookTitle.setError("Book Title is required");
@@ -102,15 +137,19 @@ public class EditReviewActivity extends AppCompatActivity {
             // If validation passes, create a new review and add it to the database
             Review review = new Review(
                     bookTitle,
+                    pubYear,
+                    coverURL,
                     rating,
                     favorited,
                     reviewTitle,
                     reviewContent,
                     user.getUid(),
+                    user.getDisplayName(),
                     editReview.getReviewDate()
             );
 
-            Toast.makeText(EditReviewActivity.this, "Saving changes...", Toast.LENGTH_LONG).show();
+            Toast addToast = Toast.makeText(EditReviewActivity.this, "Saving changes...", Toast.LENGTH_SHORT);
+            addToast.show();
             mDb.collection(UserFeedActivity.REVIEWS)
                     .document(editReview.getId())
                     .set(review)
@@ -118,15 +157,17 @@ public class EditReviewActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()){
+                                addToast.cancel();
                                 Log.d(TAG, "Review updated with ID: " + editReview.getId());
-                                Toast.makeText(EditReviewActivity.this, "Successfully updated review!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(EditReviewActivity.this, "Successfully updated review!", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(EditReviewActivity.this, UserFeedActivity.class);
                                 startActivity(intent);
                             }
                             else {
                                 Exception e = task.getException();
                                 Log.w(TAG, "Error updating review: ", e);
-                                Toast.makeText(EditReviewActivity.this, "Error updating review: " + e, Toast.LENGTH_LONG).show();
+                                addToast.cancel();
+                                Toast.makeText(EditReviewActivity.this, "Error updating review: " + e, Toast.LENGTH_SHORT).show();
                             }
 
                         }
